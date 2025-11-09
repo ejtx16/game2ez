@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model games {
+  id                         BigInt    @id
+  date                       DateTime  @db.Date
+  season                     Int
+  status                     String    @db.VarChar(50)
+  period                     Int?
+  time                       String?   @db.VarChar(20)
+  postseason                 Boolean?  @default(false)
+  home_team_score            Int?
+  visitor_team_score         Int?
+  datetime                   DateTime? @db.Timestamp(6)
+  home_q1                    Int?
+  home_q2                    Int?
+  home_q3                    Int?
+  home_q4                    Int?
+  home_ot1                   Int?
+  home_ot2                   Int?
+  home_ot3                   Int?
+  home_timeouts_remaining    Int?
+  home_in_bonus              Boolean?
+  visitor_q1                 Int?
+  visitor_q2                 Int?
+  visitor_q3                 Int?
+  visitor_q4                 Int?
+  visitor_ot1                Int?
+  visitor_ot2                Int?
+  visitor_ot3                Int?
+  visitor_timeouts_remaining Int?
+  visitor_in_bonus           Boolean?
+  home_team_id               Int?
+  home_team_conference       String?   @db.VarChar(50)
+  home_team_division         String?   @db.VarChar(50)
+  home_team_city             String?   @db.VarChar(100)
+  home_team_name             String?   @db.VarChar(100)
+  home_team_full_name        String?   @db.VarChar(150)
+  home_team_abbreviation     String?   @db.VarChar(10)
+  visitor_team_id            Int?
+  visitor_team_conference    String?   @db.VarChar(50)
+  visitor_team_division      String?   @db.VarChar(50)
+  visitor_team_city          String?   @db.VarChar(100)
+  visitor_team_name          String?   @db.VarChar(100)
+  visitor_team_full_name     String?   @db.VarChar(150)
+  visitor_team_abbreviation  String?   @db.VarChar(10)
+  created_at                 DateTime? @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([date], map: "idx_games_date")
+  @@index([datetime], map: "idx_games_datetime")
+  @@index([home_team_abbreviation], map: "idx_games_home_team_abbreviation")
+  @@index([home_team_id], map: "idx_games_home_team_id")
+  @@index([postseason], map: "idx_games_postseason")
+  @@index([season], map: "idx_games_season")
+  @@index([status], map: "idx_games_status")
+  @@index([visitor_team_abbreviation], map: "idx_games_visitor_team_abbreviation")
+  @@index([visitor_team_id], map: "idx_games_visitor_team_id")
+}
+
+model players {
+  id                Int       @id @default(autoincrement())
+  first_name        String    @db.VarChar(100)
+  last_name         String    @db.VarChar(100)
+  position          String?   @db.VarChar(10)
+  height            String?   @db.VarChar(10)
+  weight            String?   @db.VarChar(10)
+  jersey_number     String?   @db.VarChar(5)
+  college           String?   @db.VarChar(150)
+  country           String?   @db.VarChar(100)
+  draft_year        Int?
+  draft_round       Int?
+  draft_number      Int?
+  team_id           Int?
+  team_conference   String?   @db.VarChar(50)
+  team_division     String?   @db.VarChar(50)
+  team_city         String?   @db.VarChar(100)
+  team_name         String?   @db.VarChar(100)
+  team_full_name    String?   @db.VarChar(150)
+  team_abbreviation String?   @db.VarChar(10)
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  updated_at        DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([country], map: "idx_players_country")
+  @@index([draft_year], map: "idx_players_draft_year")
+  @@index([first_name], map: "idx_players_first_name")
+  @@index([last_name], map: "idx_players_last_name")
+  @@index([position], map: "idx_players_position")
+  @@index([team_abbreviation], map: "idx_players_team_abbreviation")
+  @@index([team_id], map: "idx_players_team_id")
+}
+
+model stats {
+  id                      BigInt    @id
+  min                     String?   @db.VarChar(10)
+  fgm                     Int?
+  fga                     Int?
+  fg_pct                  Decimal?  @db.Decimal(5, 3)
+  fg3m                    Int?
+  fg3a                    Int?
+  fg3_pct                 Decimal?  @db.Decimal(5, 3)
+  ftm                     Int?
+  fta                     Int?
+  ft_pct                  Decimal?  @db.Decimal(5, 3)
+  oreb                    Int?
+  dreb                    Int?
+  reb                     Int?
+  ast                     Int?
+  stl                     Int?
+  blk                     Int?
+  turnover                Int?
+  pf                      Int?
+  pts                     Int?
+  player_id               Int?
+  player_first_name       String?   @db.VarChar(100)
+  player_last_name        String?   @db.VarChar(100)
+  player_position         String?   @db.VarChar(10)
+  player_height           String?   @db.VarChar(10)
+  player_weight           String?   @db.VarChar(10)
+  player_jersey_number    String?   @db.VarChar(5)
+  player_college          String?   @db.VarChar(150)
+  player_country          String?   @db.VarChar(100)
+  player_draft_year       Int?
+  player_draft_round      Int?
+  player_draft_number     Int?
+  player_team_id          Int?
+  team_id                 Int?
+  team_conference         String?   @db.VarChar(50)
+  team_division           String?   @db.VarChar(50)
+  team_city               String?   @db.VarChar(100)
+  team_name               String?   @db.VarChar(100)
+  team_full_name          String?   @db.VarChar(150)
+  team_abbreviation       String?   @db.VarChar(10)
+  game_id                 BigInt?
+  game_date               DateTime? @db.Date
+  game_season             Int?
+  game_status             String?   @db.VarChar(50)
+  game_period             Int?
+  game_time               String?   @db.VarChar(20)
+  game_postseason         Boolean?
+  game_home_team_score    Int?
+  game_visitor_team_score Int?
+  game_home_team_id       Int?
+  game_visitor_team_id    Int?
+  created_at              DateTime? @default(now()) @db.Timestamp(6)
+  updated_at              DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([ast], map: "idx_stats_ast")
+  @@index([game_date], map: "idx_stats_game_date")
+  @@index([game_id], map: "idx_stats_game_id")
+  @@index([game_id, game_postseason], map: "idx_stats_game_postseason")
+  @@index([game_season], map: "idx_stats_game_season")
+  @@index([player_id, game_id], map: "idx_stats_player_game")
+  @@index([player_id], map: "idx_stats_player_id")
+  @@index([player_first_name, player_last_name], map: "idx_stats_player_name")
+  @@index([pts], map: "idx_stats_pts")
+  @@index([reb], map: "idx_stats_reb")
+  @@index([game_season, player_id], map: "idx_stats_season_player")
+  @@index([team_abbreviation], map: "idx_stats_team_abbreviation")
+  @@index([team_id, game_id], map: "idx_stats_team_game")
+  @@index([team_id], map: "idx_stats_team_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model teams {
+  id              Int       @id @default(autoincrement())
+  conference      String    @db.VarChar(50)
+  division        String    @db.VarChar(50)
+  city            String    @db.VarChar(100)
+  name            String    @db.VarChar(100)
+  full_name       String    @db.VarChar(150)
+  abbreviation    String    @unique @db.VarChar(10)
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([abbreviation], map: "idx_teams_abbreviation")
+  @@index([conference], map: "idx_teams_conference")
+  @@index([division], map: "idx_teams_division")
+}
