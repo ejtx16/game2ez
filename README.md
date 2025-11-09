@@ -72,4 +72,4 @@ prisma/
 
 ## Documentation
 
-See [CLAUDE.md](./CLAUDE.md) for comprehensive development guidelines and architecture details.
+See [architecture.md](./architecture.md) for comprehensive development guidelines and architecture details.

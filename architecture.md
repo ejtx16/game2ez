@@ -7,17 +7,20 @@ Next.js 15 application using React Server Components (RSC). Components are eithe
 **No "use client" directive needed**
 
 **Can:**
+
 - Be async functions
 - Access databases/APIs directly
 - Render static content
 - Zero JavaScript to client
 
 **Cannot:**
+
 - Use React hooks (useState, useEffect, etc.)
 - Use event handlers (onClick, onChange)
 - Access browser APIs
 
 **Example:**
+
 ```typescript
 // No "use client" directive
 async function getPosts() {
@@ -36,12 +39,14 @@ export async function PostFeed() {
 **Requires "use client" at top of file**
 
 **Can:**
+
 - Use React hooks (useState, useEffect, useContext)
 - Handle events (onClick, onChange, onSubmit)
 - Access browser APIs (window, localStorage)
 - Manage client-side state
 
 **Example:**
+
 ```typescript
 "use client";
 
@@ -56,12 +61,14 @@ export function Counter() {
 ## When to Use
 
 **Server Components** (default choice):
+
 - Fetching data from databases/APIs
 - Static content rendering
 - SEO-critical content
 - No user interaction needed
 
 **Client Components** (only when needed):
+
 - Forms and user input
 - Interactive UI elements
 - Browser APIs required
@@ -85,12 +92,14 @@ export function Counter() {
 ## Performance Benefits
 
 **Server Components:**
+
 - Reduced bundle size
 - Faster initial load
 - Automatic code splitting
 - Better SEO
 
 **Client Components:**
+
 - Rich interactivity
 - Real-time updates
 - Dynamic experiences
