@@ -1,25 +1,16 @@
-# Game2EZ Next.js Boilerplate
+# Game2EZ
 
-A modern Next.js 15 boilerplate built with React 19, TypeScript, and Server Components. Provides both frontend and backend capabilities with a clean, scalable architecture.
+NBA player data visualization and management application with unique features built with Next.js 15.
 
-## Features
+## Tech Stack
 
-- Next.js 15 with App Router
-- React 19 with Server Components
-- TypeScript for type safety
-- Tailwind CSS for styling
-- API Routes for backend functionality
-- ESLint for code quality
-- Responsive design with dark mode support
+- **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS
+- **State:** Redux Toolkit
+- **Database:** Prisma with PostgreSQL
+- **UI Components:** shadcn/ui
+- **Data Source:** @balldontlie/sdk (NBA API)
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm, yarn, or pnpm
-
-### Installation
+## Quick Start
 
 1. Install dependencies:
 
@@ -27,77 +18,58 @@ A modern Next.js 15 boilerplate built with React 19, TypeScript, and Server Comp
    npm install
    ```
 
-2. Run the development server:
+2. Set up environment variables:
+
+   ```bash
+   DATABASE_URL="postgresql://..."
+   ```
+
+3. Run development server:
 
    ```bash
    npm run dev
    ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
+4. Open [http://localhost:3000](http://localhost:3000)
 
-## Available Scripts
+## Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
-- `npm run start` - Start production server
 - `npm run lint` - Run ESLint
-- `npm run type-check` - Run TypeScript type checking
+- `npm run type-check` - TypeScript type checking
 
-## API Endpoints
+## Features
 
-### Health Check
-
-- `GET /api/health` - System health status
-
-### User Management
-
-- `GET /api/users` - Get all users (supports `limit` and `role` query params)
-- `POST /api/users` - Create new user
-- `GET /api/users/[id]` - Get user by ID
-- `PUT /api/users/[id]` - Update user
-- `DELETE /api/users/[id]` - Delete user
+- NBA teams, players, and game statistics
+- Dark/light theme with persistence
+- Server-side rendering with React Server Components
+- Responsive design with mobile-first approach
+- Optimized data fetching with caching
 
 ## Project Structure
 
 ```
-Game2EZ/
-├── app/                    # App Router directory
-│   ├── api/               # API routes
-│   ├── dashboard/         # Dashboard page
-│   ├── layout.tsx         # Root layout
-│   └── page.tsx           # Home page
-├── components/            # Reusable components
-├── next.config.js         # Next.js configuration
-├── tailwind.config.js     # Tailwind CSS configuration
-├── tsconfig.json          # TypeScript configuration
-└── ARCHITECTURE.md        # Component architecture documentation
+app/
+├── (pages)/           # Route groups (favorites, teams, profile)
+├── api/               # API route handlers
+├── layout.tsx         # Root layout with providers
+└── page.tsx           # Home page
+components/            # Reusable UI components
+lib/
+├── store/             # Redux Toolkit store and slices
+└── hooks/             # Custom typed hooks
+prisma/
+└── schema.prisma      # Database schema
 ```
 
-## Architecture
+## Database Models
 
-This project uses React Server Components (RSC) architecture:
+- `teams` - NBA team information
+- `players` - Player profiles and team associations
+- `games` - Game data with scores and team details
+- `stats` - Player statistics per game
 
-- **Server Components** (default) - Render on server, zero JavaScript to client
-  - `PostFeed.tsx`, `UserStats.tsx`, `WelcomeSection.tsx`
-- **Client Components** ("use client") - Interactive components with hooks and event handlers
-  - `ApiTester.tsx`, `InteractiveCounter.tsx`, `UserManagement.tsx`
+## Documentation
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed component architecture documentation.
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push code to GitHub
-2. Connect repository to Vercel
-3. Deploy automatically
-
-### Other Platforms
-
-1. Build: `npm run build`
-2. Start: `npm run start`
-3. Ensure Node.js 18+ is available
-
-## License
-
-This project is open source and available under the MIT License.
+See [CLAUDE.md](./CLAUDE.md) for comprehensive development guidelines and architecture details.
