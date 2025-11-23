@@ -42,7 +42,7 @@ NBA player data visualization and management application with unique features bu
 ## Features
 
 - NBA teams, players, and game statistics
-- Favorites feature to highlight you favs
+- Favorites feature to highlight your favs
 - Dark/light theme with persistence
 - Server-side rendering with React Server Components
 - Responsive design with mobile-first approach
