@@ -1,5 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import themeReducer from "./features/theme/themeSlice";
 import favoritesReducer from "./features/favorites/favoritesSlice";
 
 // Create a store factory function instead of a global store instance
@@ -7,7 +6,6 @@ import favoritesReducer from "./features/favorites/favoritesSlice";
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      theme: themeReducer,
       favorites: favoritesReducer,
       // Add your other reducers here
     },

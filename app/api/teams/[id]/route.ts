@@ -1,10 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { BalldontlieAPI } from "@balldontlie/sdk";
 import type { Team } from "@/types";
 
 const api = new BalldontlieAPI({
   apiKey: process.env.BALLDONTLIE_API_KEY || "",
 });
+
+/**
+ * Cached function to fetch team details from BallDontLie API
+ * Cache duration: 1 hour (3600 seconds)
+ * Note: Cache key includes teamId to ensure each team has its own cache entry
+ */
+const getCachedTeam = (teamId: number) =>
+  unstable_cache(
+    async () => {
+      return await api.nba.getTeam(teamId);
+    },
+    ["nba-team-details", teamId.toString()],
+    {
+      revalidate: 3600, // 1 hour
+      tags: ["nba-teams", `team-${teamId}`],
+    }
+  )();
 
 /**
  * GET /api/teams/[id]
@@ -35,8 +53,8 @@ export async function GET(
 
     const teamId = Number(id);
 
-    // Fetch team from BallDontLie API
-    const response = await api.nba.getTeam(teamId);
+    // Fetch team from BallDontLie API (cached for 1 hour)
+    const response = await getCachedTeam(teamId);
 
     // Convert to our Team type
     const team: Team = {

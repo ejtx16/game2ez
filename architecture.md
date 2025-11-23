@@ -76,10 +76,10 @@ export function Counter() {
 
 ## Import Rules
 
-✓ Server can import Server
-✓ Server can import Client
-✓ Client can import Client
-✗ Client CANNOT import Server (use children props instead)
+Server can import Server
+Server can import Client
+Client can import Client
+Client CANNOT import Server (use children props instead)
 
 ## Best Practices
 

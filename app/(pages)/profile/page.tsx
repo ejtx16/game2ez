@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Calendar, Star, Bookmark, Edit3, type LucideIcon } from "lucide-react";
 
@@ -184,6 +185,12 @@ async function ProfileContent() {
 }
 
 export default function ProfilePage() {
+  const isProfileEnabled = process.env.NEXT_PUBLIC_ENABLE_PROFILE_PAGE === 'true';
+
+  if (!isProfileEnabled) {
+    notFound();
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 m-10 bg-background min-h-screen">
       <Suspense

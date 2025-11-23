@@ -4,7 +4,7 @@
  * Type definitions for API responses and error handling.
  */
 
-import type { Team } from "./index";
+import type { Team, Game, Stats } from "./index";
 
 /**
  * Standard API response wrapper
@@ -82,3 +82,21 @@ export interface BallDontLieResponse<T> {
 export interface TeamsResponse extends ApiResponse<Team[]> {}
 
 export interface TeamResponse extends ApiResponse<Team> {}
+
+/**
+ * Games API responses
+ */
+export interface GamesResponse extends ApiResponse<Game[]> {
+  count?: number
+}
+
+export interface GameResponse extends ApiResponse<Game> {}
+
+/**
+ * Stats API responses
+ */
+export interface StatsResponse extends ApiResponse<Stats[]> {
+  count?: number
+}
+
+export interface StatResponse extends ApiResponse<Stats> {}

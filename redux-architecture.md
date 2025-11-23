@@ -10,10 +10,10 @@ This diagram visualizes the Redux Toolkit architecture using the Store Factory p
 flowchart LR
     User[User clicks button]
     Component[React Component]
-    Action[Action: toggleTheme]
+    Action[Action: addFavorite]
     Store[(Redux Store)]
     Reducer[Reducer: updates state]
-    NewState[New State: dark mode]
+    NewState[New State: team added]
 
     User -->|Click| Component
     Component -->|Dispatch| Action
@@ -38,13 +38,13 @@ flowchart LR
 
 Think of Redux like a simple loop:
 
-1. **User clicks** a button (toggle dark mode)
-2. **Component sends** a message called "toggleTheme"
+1. **User clicks** a button (add to favorites)
+2. **Component sends** a message called "addFavorite"
 3. **Redux Store receives** the message
-4. **Reducer changes** the state (light → dark)
-5. **New state created** (dark mode is now ON)
+4. **Reducer changes** the state (adds team to favorites)
+5. **New state created** (favorites list updated)
 6. **Component gets updated** automatically
-7. **Screen re-renders** with dark theme
+7. **Screen re-renders** with updated favorites
 
 ### Setup (How it starts)
 
@@ -53,7 +53,7 @@ flowchart TB
     App[App Starts]
     Provider[StoreProvider wraps app]
     Store[(Redux Store Created)]
-    Slices[Two containers: Theme + Favorites]
+    Slices[Favorites container]
 
     App --> Provider
     Provider --> Store
@@ -64,7 +64,6 @@ flowchart TB
 ```
 
 **What's in the store:**
-- **Theme container**: Stores if app is light or dark
 - **Favorites container**: Stores which teams you liked
 
 ## Redux Flow in Your App
@@ -72,20 +71,20 @@ flowchart TB
 ### 1. Initialization (App Startup)
 ```
 App Start → StoreProvider renders → makeStore() called →
-configureStore creates Redux store → combines theme + favorites reducers
+configureStore creates Redux store → loads favorites reducer
 ```
 
 ### 2. Reading State (Component → State)
 ```
 Component imports useAppSelector →
-calls selector (e.g., selectTheme) →
+calls selector (e.g., selectFavorites) →
 reads from RootState → component renders
 ```
 
 ### 3. Updating State (Component → Action → Reducer → State)
 ```
 User interaction → Component calls useAppDispatch →
-dispatch(action) (e.g., toggleTheme()) →
+dispatch(action) (e.g., addFavorite()) →
 reducer updates state (Immer handles immutability) →
 side effect writes to localStorage →
 components re-render with new state
@@ -103,7 +102,6 @@ full autocomplete & type checking in components
 | File | Purpose |
 |------|---------|
 | `lib/store/store.ts` | Store factory + type exports |
-| `lib/store/features/theme/themeSlice.ts` | Theme state management |
 | `lib/store/features/favorites/favoritesSlice.ts` | Favorites state management |
 | `lib/hooks/hooks.ts` | Typed Redux hooks |
 | `app/StoreProvider.tsx` | Redux Provider wrapper |

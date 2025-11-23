@@ -50,7 +50,8 @@ The application strictly follows Next.js 15 Server Components architecture:
 - Store factory pattern: `makeStore()` creates new store instances (Next.js App Router requirement)
 - Provider: `StoreProvider` wraps the app in `app/layout.tsx`
 - Typed hooks: Use `useAppDispatch`, `useAppSelector`, `useAppStore` from `@/lib/hooks`
-- Current slices: `themeSlice` for theme management (light/dark mode with localStorage persistence)
+- Current slices: `favoritesSlice` for managing favorite teams
+- Theme management: Uses `next-themes` (not Redux) with default dark mode
 
 **Adding new state:**
 
@@ -282,6 +283,6 @@ See `documentations/client-search-debouncing.md` for full implementation details
 
 - **Strict mode enabled:** TypeScript and ESLint errors will fail builds
 - **Prisma output:** Generated client is in `app/generated/prisma`, not default location
-- **Theme persistence:** Theme state is synced to localStorage via Redux middleware
+- **Theme persistence:** Theme state is managed by `next-themes` with localStorage persistence (default: dark mode)
 - **Server/Client boundary:** Client Components cannot import Server Components (only receive as children)
 - **Commenting and Code Generation:** Don't use emojis when generating code, commenting a code block, and generating documentations md file
