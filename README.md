@@ -18,7 +18,7 @@ NBA player data visualization and management application with unique features bu
    npm install
    ```
 
-2. Set up environment variables:
+2. Set up environment variables (optional):
 
    ```bash
    DATABASE_URL="postgresql://..."
@@ -32,16 +32,17 @@ NBA player data visualization and management application with unique features bu
 
 4. Open [http://localhost:3000](http://localhost:3000)
 
-## Scripts
+<!-- ## Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run lint` - Run ESLint
-- `npm run type-check` - TypeScript type checking
+- `npm run type-check` - TypeScript type checking -->
 
 ## Features
 
 - NBA teams, players, and game statistics
+- Favorites feature to highlight you favs
 - Dark/light theme with persistence
 - Server-side rendering with React Server Components
 - Responsive design with mobile-first approach
@@ -63,13 +64,25 @@ prisma/
 └── schema.prisma      # Database schema
 ```
 
-## Database Models
+<!-- ## Database Models (not official)
 
 - `teams` - NBA team information
 - `players` - Player profiles and team associations
 - `games` - Game data with scores and team details
-- `stats` - Player statistics per game
+- `stats` - Player statistics per game -->
+
+## Coming Soon...
+
+**"My Bag"** feature that act like your personal piggy bank tracker
 
 ## Documentation
 
 See [architecture.md](./architecture.md) for comprehensive development guidelines and architecture details.
+Also you can check redux architecture [redux-architecture.md](./redux-architecture.md) guide for more information how it works in this project.
+
+## Other Docs
+
+Please visit thes two documents:
+
+- PRD - https://docs.google.com/document/d/1BCzyvLONlg9AdEeKNwB4O54u4xm3XKAXvWLgTL6rpLo/edit?usp=sharing
+- Design Docs - https://docs.google.com/document/d/1gNH5rnTRJN0F1KowQ3aF8Hs2FZxVYNZCx2QNKKLb8Jg/edit?usp=sharing
