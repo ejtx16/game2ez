@@ -15,6 +15,7 @@ export async function GET(
 
 	try {
 		const apiKey = process.env.BALLDONTLIE_API_KEY
+		const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1'
 
 		if (!apiKey) {
 			console.error('BALLDONTLIE_API_KEY is not set')
@@ -25,7 +26,7 @@ export async function GET(
 		}
 
 		const response = await fetch(
-			`https://api.balldontlie.io/v1/players/${playerId}`,
+			`${apiUrl}/players/${playerId}`,
 			{
 				headers: {
 					Authorization: apiKey,

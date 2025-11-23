@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Heart, Loader2, MapPin, Trophy, Building2 } from "lucide-react";
+import { Heart, MapPin, Trophy, Building2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { toggleFavorite, initializeFavorites, selectIsFavorite } from "@/lib/store/features/favorites/favoritesSlice";
 import type { Team } from "@/types";

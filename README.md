@@ -86,3 +86,21 @@ Please visit thes two documents:
 
 - PRD - https://docs.google.com/document/d/1BCzyvLONlg9AdEeKNwB4O54u4xm3XKAXvWLgTL6rpLo/edit?usp=sharing
 - Design Docs - https://docs.google.com/document/d/1gNH5rnTRJN0F1KowQ3aF8Hs2FZxVYNZCx2QNKKLb8Jg/edit?usp=sharing
+
+## License
+
+Game2EZ is free software licensed under the [GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)](LICENSE).
+
+This means you have the freedom to:
+- Use the software for any purpose
+- Study how it works and modify it
+- Redistribute copies
+- Distribute modified versions
+
+**Important:** If you run a modified version of this software on a server and let others interact with it there, you must make the modified source code available to those users. This ensures that everyone who uses the software over a network has access to its source code.
+
+For more details, see the [LICENSE](LICENSE) file or visit https://www.gnu.org/licenses/agpl-3.0.html.
+
+### Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.

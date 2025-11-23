@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import type { Team } from "@/types";
 import FavoriteTeamsList from "./FavoriteTeamsList";
 import { getCachedTeamsData } from "@/lib/api/teams";
 

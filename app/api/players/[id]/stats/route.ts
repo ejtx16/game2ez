@@ -3,6 +3,7 @@ import { unstable_cache } from 'next/cache'
 
 async function fetchPlayerStatsFromAPI(playerId: string, searchParams: URLSearchParams) {
 	const apiKey = process.env.BALLDONTLIE_API_KEY
+	const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1'
 
 	if (!apiKey) {
 		throw new Error('BALLDONTLIE_API_KEY is not set')
@@ -35,7 +36,7 @@ async function fetchPlayerStatsFromAPI(playerId: string, searchParams: URLSearch
 	}
 
 	const response = await fetch(
-		`https://api.balldontlie.io/v1/stats?${params.toString()}`,
+		`${apiUrl}/stats?${params.toString()}`,
 		{
 			headers: {
 				Authorization: apiKey,

@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import type { Stats } from '@/types'
 
 interface RecentGamesProps {
@@ -42,7 +42,6 @@ export default function RecentGames({ stats, limit = 3 }: RecentGamesProps) {
 
 		const homeScore = stat.game.home_team_score
 		const visitorScore = stat.game.visitor_team_score
-		const playerTeamId = stat.team?.id
 
 		const isHome = stat.game.status === 'Final'
 		const won = (isHome && homeScore > visitorScore) || (!isHome && visitorScore > homeScore)

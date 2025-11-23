@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { unstable_cache } from 'next/cache'
 import {
 	ArrowLeft,
 	User,
@@ -13,68 +14,108 @@ import {
 	BarChart3,
 } from 'lucide-react'
 import Link from 'next/link'
-import type { Player, Stats } from '@/types'
+import type { Player } from '@/types'
 import PlayerStatsChart from '@/components/PlayerStatsChart'
 import PlayerStatsLineChart from '@/components/PlayerStatsLineChart'
 import PlayerStatsPolarChart from '@/components/PlayerStatsPolarChart'
 import PlayerStatsSummary from '@/components/PlayerStatsSummary'
 import RecentGames from '@/components/RecentGames'
 
-interface PlayerResponse {
-	data: Player
-}
+const getPlayerData = (playerId: string) =>
+	unstable_cache(
+		async () => {
+			const apiKey = process.env.BALLDONTLIE_API_KEY
+			const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1'
 
-interface StatsResponse {
-	data: Stats[]
-	meta?: {
-		next_cursor?: number
-		per_page?: number
-	}
-}
-
-async function getPlayerData(id: string): Promise<Player | null> {
-	try {
-		const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-		const response = await fetch(`${baseUrl}/api/players/${id}`, {
-			cache: 'no-store',
-		})
-
-		if (!response.ok) {
-			console.error('Failed to fetch player:', response.statusText)
-			return null
-		}
-
-		const data: PlayerResponse = await response.json()
-		return data.data
-	} catch (error) {
-		console.error('Error fetching player:', error)
-		return null
-	}
-}
-
-async function getPlayerStats(id: string): Promise<Stats[]> {
-	try {
-		const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-		const currentSeason = new Date().getFullYear()
-		const response = await fetch(
-			`${baseUrl}/api/players/${id}/stats?seasons=${currentSeason}&per_page=25`,
-			{
-				cache: 'no-store',
+			if (!apiKey) {
+				console.error('BALLDONTLIE_API_KEY is not set')
+				return null
 			}
-		)
 
-		if (!response.ok) {
-			console.error('Failed to fetch player stats:', response.statusText)
-			return []
+			try {
+				const response = await fetch(
+					`${apiUrl}/players/${playerId}`,
+					{
+						headers: {
+							Authorization: apiKey,
+						},
+					}
+				)
+
+				if (!response.ok) {
+					console.error(
+						`Failed to fetch player ${playerId}:`,
+						response.status,
+						response.statusText
+					)
+					return null
+				}
+
+				const responseData = await response.json()
+				const player: Player = responseData.data
+
+				return player
+			} catch (error) {
+				console.error('Error fetching player:', error)
+				return null
+			}
+		},
+		['player-details', playerId],
+		{
+			revalidate: 1800,
+			tags: ['player-details', `player-${playerId}`],
 		}
+	)()
 
-		const data: StatsResponse = await response.json()
-		return data.data || []
-	} catch (error) {
-		console.error('Error fetching player stats:', error)
-		return []
-	}
-}
+const getPlayerStats = (playerId: string) =>
+	unstable_cache(
+		async () => {
+			const apiKey = process.env.BALLDONTLIE_API_KEY
+			const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1'
+
+			if (!apiKey) {
+				console.error('BALLDONTLIE_API_KEY is not set')
+				return []
+			}
+
+			try {
+				const currentSeason = new Date().getFullYear()
+				const params = new URLSearchParams()
+				params.set('player_ids[]', playerId)
+				params.set('seasons[]', currentSeason.toString())
+				params.set('per_page', '25')
+
+				const response = await fetch(
+					`${apiUrl}/stats?${params.toString()}`,
+					{
+						headers: {
+							Authorization: apiKey,
+						},
+					}
+				)
+
+				if (!response.ok) {
+					console.error(
+						`Failed to fetch player stats for ${playerId}:`,
+						response.status,
+						response.statusText
+					)
+					return []
+				}
+
+				const data = await response.json()
+				return data.data || []
+			} catch (error) {
+				console.error('Error fetching player stats:', error)
+				return []
+			}
+		},
+		['player-stats', playerId, new Date().getFullYear().toString()],
+		{
+			revalidate: 1800,
+			tags: ['player-stats', `player-${playerId}`],
+		}
+	)()
 
 export default async function PlayerPage({
 	params,

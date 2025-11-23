@@ -1,6 +1,4 @@
 import { Suspense } from "react";
-import type { Team } from "@/types";
-import TeamCard from "./TeamCard";
 import TeamsSearch from "./TeamsSearch";
 import { getCachedTeamsData } from "@/lib/api/teams";
 

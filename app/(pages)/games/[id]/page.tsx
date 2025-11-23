@@ -11,12 +11,13 @@ const getCachedGame = (gameId: number) =>
   unstable_cache(
     async () => {
       const apiKey = process.env.BALLDONTLIE_API_KEY;
+      const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1';
 
       if (!apiKey) {
         throw new Error("BallDontLie API key is not configured");
       }
 
-      const response = await fetch(`https://api.balldontlie.io/v1/games/${gameId}`, {
+      const response = await fetch(`${apiUrl}/games/${gameId}`, {
         headers: {
           Authorization: apiKey,
         },
@@ -281,7 +282,7 @@ export default async function GamePage({ params }: GamePageProps) {
                 <tbody>
                   <tr className={`border-b border-zinc-200 dark:border-zinc-800 transition-colors ${isVisitorWin ? "bg-green-500/5" : ""}`}>
                     <td className="py-3 px-2 md:px-3 font-bold text-zinc-900 dark:text-white text-sm">{game.visitor_team_abbreviation}</td>
-                    {quarters.map((q, idx) => (
+                    {quarters.map((q) => (
                       <td
                         key={q.label}
                         className="text-center py-3 px-1.5 md:px-2 text-zinc-700 dark:text-zinc-300 font-medium tabular-nums"
@@ -299,7 +300,7 @@ export default async function GamePage({ params }: GamePageProps) {
                   </tr>
                   <tr className={`transition-colors ${isHomeWin ? "bg-green-500/5" : ""}`}>
                     <td className="py-3 px-2 md:px-3 font-bold text-zinc-900 dark:text-white text-sm">{game.home_team_abbreviation}</td>
-                    {quarters.map((q, idx) => (
+                    {quarters.map((q) => (
                       <td
                         key={q.label}
                         className="text-center py-3 px-1.5 md:px-2 text-zinc-700 dark:text-zinc-300 font-medium tabular-nums"
