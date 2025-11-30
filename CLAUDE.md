@@ -1,288 +1,133 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Game2EZ - Next.js 15 NBA data visualization app with React 19, TypeScript, Tailwind CSS, Redux Toolkit, and Prisma/PostgreSQL.
 
-## Project Overview
+## Commands
 
-Game2EZ is a Next.js 15 application for NBA data visualization and management. It uses React 19 with Server Components, TypeScript, Tailwind CSS, Redux Toolkit for state management, and Prisma with PostgreSQL for database access.
+- `npm run dev` - Development server (localhost:3000)
+- `npm run build` - Production build with type checking and linting
+- `npm run lint` - ESLint
+- `npm run type-check` - TypeScript validation
 
-## Development Commands
-
-### Essential Commands
-
-- `npm run dev` - Start development server on http://localhost:3000
-- `npm run build` - Build for production (runs type checking and linting)
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run type-check` - Run TypeScript compiler without emitting files
-
-### Database Commands
-
-- Prisma client is generated to `app/generated/prisma`
-- Database connection: PostgreSQL via `DATABASE_URL` environment variable
+**Database**: Prisma client generated to `app/generated/prisma`, PostgreSQL via `DATABASE_URL`
 
 ## Architecture
 
-### React Server/Client Component Pattern
+### Server/Client Components
 
-The application strictly follows Next.js 15 Server Components architecture:
+**Server Components (default)**: Async functions, direct DB/API access, no `"use client"`, zero client JS
+**Client Components**: `"use client"` required for hooks, state, interactivity, browser APIs
 
-**Server Components (default):**
-
-- No `"use client"` directive
-- Can be async functions
-- Direct database/API access
-- Zero JavaScript shipped to client
-- Cannot use hooks or event handlers
-
-**Client Components:**
-
-- Must have `"use client"` directive at top of file
-- Required for: interactivity, React hooks, browser APIs, event handlers
-- Examples: forms, counters, interactive UI elements
-
-**Decision rule:** Default to Server Components. Only add `"use client"` when you need hooks, state, or browser interactivity.
+**Rule**: Default to Server Components. Only use Client Components for interactivity.
 
 ### State Management
 
-**Redux Toolkit Setup:**
+**Redux Toolkit**: Store factory `makeStore()` in `lib/store/store.ts`, provider in `app/layout.tsx`
+**Typed hooks**: `useAppDispatch`, `useAppSelector`, `useAppStore` from `@/lib/hooks`
+**Slices**: `favoritesSlice` for favorite teams
+**Theme**: `next-themes` with dark mode default (not Redux)
 
-- Store factory pattern: `makeStore()` creates new store instances (Next.js App Router requirement)
-- Provider: `StoreProvider` wraps the app in `app/layout.tsx`
-- Typed hooks: Use `useAppDispatch`, `useAppSelector`, `useAppStore` from `@/lib/hooks`
-- Current slices: `favoritesSlice` for managing favorite teams
-- Theme management: Uses `next-themes` (not Redux) with default dark mode
+**Add state**: Create slice in `lib/store/features/[feature]/[feature]Slice.ts`, add to store, use typed hooks
 
-**Adding new state:**
+See: `documentations/redux-toolkit-setup.md`
 
-1. Create slice in `lib/store/features/[feature]/[feature]Slice.ts`
-2. Add reducer to `lib/store/store.ts`
-3. Use typed hooks from `@/lib/hooks` in client components
+### Database
 
-### Database Schema
+**Models**: `games`, `players`, `teams`, `stats` (see `prisma/schema.prisma`)
+**Relationships**: Denormalized team data in games, player/game data in stats, indexed fields
 
-**Prisma models:**
+See: `prisma/schema.prisma`
 
-- `games` - NBA game data with home/visitor teams, scores, quarters
-- `players` - Player information with team associations
-- `teams` - Team details (conference, division, city, abbreviation)
-- `stats` - Player statistics per game (comprehensive stats: pts, reb, ast, fg%, etc.)
+## Structure
 
-**Key relationships:**
+**Path Aliases**: `@/*` (root), `@/components/*`, `@/lib/*`, `@/types/*`
 
-- Games include denormalized team data (home*team*_, visitor*team*_)
-- Stats include denormalized player and game data
-- All models have indexed fields for common queries
+**Key Directories**:
 
-## File Structure
+- `app/(pages)/` - Pages (favorites, teams, profile, players, games)
+- `app/api/` - API routes
+- `components/` - Reusable UI (Header, Footer, ThemeProvider)
+- `components/ui/` - shadcn/ui components
+- `lib/store/` - Redux store and slices
+- `lib/hooks/` - Typed hooks
+- `types/` - Global types
+- `context/` - Design system spec
+- `documentations/` - Feature docs
 
-### Path Aliases (tsconfig.json)
+**Key Files**:
 
-- `@/*` - Root directory
-- `@/components/*` - Reusable components
-- `@/lib/*` - Utilities, store, hooks
-- `@/types/*` - TypeScript type definitions
+- `app/layout.tsx` - Root layout with providers
+- `lib/store/store.ts` - Redux store factory
+- `lib/hooks/hooks.ts` - Custom hooks
+- `types/index.ts` - Global types
+- `context/design-system-spec.md` - Design system
 
-### Directory Layout
+## Stack
 
-```
-app/
-├── (pages)/          # Route groups for pages (favorites, teams, profile)
-├── api/              # API route handlers
-├── layout.tsx        # Root layout with StoreProvider, ThemeProvider, Header, Footer
-├── page.tsx          # Home page
-└── StoreProvider.tsx # Redux store provider wrapper
-
-components/
-├── ui/               # shadcn/ui components (button, card, avatar, sheet)
-├── Header.tsx        # Site header with navigation
-├── Footer.tsx        # Site footer
-└── ThemeProvider.tsx # Theme provider for dark/light mode
-
-lib/
-├── store/            # Redux store configuration
-│   ├── store.ts      # Store factory and types
-│   └── features/     # Redux slices
-├── hooks/            # Custom typed hooks (useAppDispatch, etc.)
-└── utils.ts          # Utility functions
-
-types/
-└── index.ts          # Global TypeScript types (User, Team, Player)
-
-prisma/
-└── schema.prisma     # Database schema
-```
-
-## Technology Stack
-
-**Core:**
-
-- Next.js 15.1.8 (App Router)
-- React 19.0.0
-- TypeScript 5
-- Node.js 18+
-
-**Styling:**
-
-- Tailwind CSS 3.4.1
-- @tailwindcss/typography
-- tailwindcss-animate
-- class-variance-authority (CVA)
-- lucide-react (icons)
-
-**State & Data:**
-
-- Redux Toolkit 2.9.2
-- Prisma 6.18.0 with @prisma/extension-accelerate
-- PostgreSQL database
-
-**UI Components:**
-
-- shadcn/ui (Radix UI primitives)
-- next-themes for theme management
-
-**External APIs:**
-
-- @balldontlie/sdk for NBA data
+**Core**: Next.js 15.1.8, React 19, TypeScript 5, Node.js 18+
+**Styling**: Tailwind CSS 3.4.1, CVA, lucide-react icons
+**State**: Redux Toolkit 2.9.2
+**Data**: Prisma 6.18.0, PostgreSQL, @balldontlie/sdk (NBA API)
+**UI**: shadcn/ui (Radix), next-themes
 
 ## Best Practices
 
-### Coding Style
+### Code Style
 
-- Use tabs for indentation
-- Use single quotes for strings (except to avoid escaping)
-- Omit semicolons (unless required for disambiguation)
-- Eliminate unused variables
-- Add space after keywords
-- Add space before function declaration parentheses
-- Always use strict equality (===) instead of loose equality (==)
-- Space infix operators
-- Add space after commas
-- Keep else statements on the same line as closing curly braces
-- Use curly braces for multi-line if statements
-- Always handle error parameters in callbacks
-- Limit line length to 80 characters
-- Use trailing commas in multiline object/array literals
-- Use optional chaining when accessing properties of an object
-- Use nullish coalescing when accessing properties of an object
-- Use logical operators to simplify conditional statements
-- Use template literals for string concatenation
-- Use arrow functions for anonymous functions
-- Use const for variables that are not reassigned
-- Use let for variables that are reassigned
-- Use var for variables that are reassigned
-
-### TypeScript
-
-- Use strict mode (enabled in tsconfig.json)
-- Define interfaces for all component props
-- Avoid `any` - use explicit types
-- Leverage path aliases for cleaner imports
+**Format**: Tabs, single quotes, no semicolons, 80 char lines, trailing commas
+**Modern JS**: Optional chaining, nullish coalescing, template literals, arrow functions, const/let (no var)
+**TypeScript**: Strict mode, interfaces for props, avoid `any`, use path aliases
+**No emojis**: Don't use emojis in code, comments, or documentation
 
 ### Components
 
-- Default to Server Components
+- Default to Server Components, use Client only for interactivity
 - Keep Client Components small and focused
-- Extract reusable logic into custom hooks
-- Use proper prop destructuring with TypeScript interfaces
+- Extract logic into custom hooks
+- Props with TypeScript interfaces
 
-### API Routes
+### API & Performance
 
-- Use Next.js Route Handlers (app/api)
-- Implement proper error handling with try/catch
-- Return appropriate HTTP status codes
-- Validate input data
+- Route Handlers in `app/api/` with try/catch and proper status codes
+- Cache static external data with `unstable_cache` (prevent rate limits)
+- Server Components for static content, loading states, error boundaries
+- Next.js Image component for images
 
-### Styling
+See: `documentations/nextjs-best-practices.md`
 
-- Use Tailwind CSS utility classes
-- Follow mobile-first responsive design
-- Use CVA for component variants
-- Maintain consistent spacing and typography
+### Search & Filtering
 
-### Performance
+**Client-Side Search** (for <10K items):
 
-- Leverage Server Components for static content
-- Implement loading states and error boundaries
-- Use Next.js Image component for images
-- Avoid unnecessary re-renders in Client Components
-- Cache static external API data using `unstable_cache` to prevent rate limiting
-
-### Search & Filtering Pattern
-
-**Client-Side Search (recommended for <10K items):**
-
-1. Server Component fetches and caches data
+1. Server Component fetches/caches data
 2. Pass data as props to Client Component
-3. Implement debounced search in Client Component:
-   - Use `useState` for immediate search query
-   - Use `useEffect` with setTimeout for debounced state (300-500ms)
-   - Use `useMemo` to memoize filtered results
-4. No additional API calls needed
+3. Client: `useState` for query, `useEffect` for debounce (300ms), `useMemo` for filtered results
+4. No additional API calls
 
-**Example pattern:**
+**Debounce delays**: 200ms (small datasets), 300ms (default), 500ms+ (large datasets)
 
-```typescript
-// Server Component
-async function getTeamsData() {
-  const teams = await fetchTeams(); // cached with unstable_cache
-  return <TeamsSearch teams={teams} />; // pass data as prop
-}
+See: `documentations/client-search-debouncing.md`
 
-// Client Component
-("use client");
-export function TeamsSearch({ teams }) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+### Caching
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+**Pattern**: `unstable_cache` from `next/cache` for static/semi-static data
+**Revalidation**: Teams (3600s), Rosters (1800s), Scores (avoid or short intervals)
+**Invalidation**: `revalidateTag()` for manual cache clearing
 
-  const filteredTeams = useMemo(() => {
-    if (!debouncedQuery.trim()) return teams;
-    const query = debouncedQuery.toLowerCase();
-    return teams.filter((t) => t.name.toLowerCase().includes(query));
-  }, [teams, debouncedQuery]);
+See: `documentations/api-teams-caching.md`, `documentations/api-team-details-caching.md`
 
-  return <>{/* render filteredTeams */}</>;
-}
-```
+## Design System
 
-**Debounce delay recommendations:**
+See: `context/design-system-spec.md`
 
-- 200ms: Responsive, real-time search (small datasets)
-- 300ms: Default, balanced (most use cases)
-- 500ms+: Large datasets, expensive operations
+**Colors**: Primary Orange `#FF6B35`, Dark BG `#0a0a0a`/`#1a1a1a`, Card `#1f1f1f`/`#2a2a2a`
+**Typography**: H1 `text-4xl`, H2 `text-3xl`, H3 `text-2xl`
+**Spacing**: 4px scale (gap-2, gap-4, gap-6, gap-8)
+**Components**: Tailwind + shadcn/ui (Button, Card, Form) + Lucide icons
 
-**Key hooks:**
+## Key Notes
 
-- `useEffect`: Implement debounce logic with cleanup
-- `useMemo`: Memoize filtered results to prevent recalculation
-- `useState`: Track search query and debounced query separately
-
-See `documentations/client-search-debouncing.md` for full implementation details and customization guide.
-
-### Caching Strategy
-
-**Frontend Caching with `unstable_cache`:**
-
-- Use for static/rarely-changing data (e.g., NBA teams, divisions)
-- Import from `next/cache`: `import { unstable_cache } from "next/cache"`
-- Basic pattern: wrap async functions with cache key, revalidation time, and tags
-- Example: Teams API is cached for 3600 seconds (1 hour) with `["nba-teams"]` key
-- Configure revalidation time based on data freshness needs:
-  - Static data (teams): 3600+ seconds
-  - Semi-static data (player rosters): 1800 seconds
-  - Dynamic data (scores): avoid caching or use shorter intervals
-- Tag-based invalidation: use `revalidateTag()` to manually clear specific caches
-- See `documentations/api-teams-caching.md` for full implementation details
-
-## Important Notes
-
-- **Strict mode enabled:** TypeScript and ESLint errors will fail builds
-- **Prisma output:** Generated client is in `app/generated/prisma`, not default location
-- **Theme persistence:** Theme state is managed by `next-themes` with localStorage persistence (default: dark mode)
-- **Server/Client boundary:** Client Components cannot import Server Components (only receive as children)
-- **Commenting and Code Generation:** Don't use emojis when generating code, commenting a code block, and generating documentations md file
+- **Strict mode**: TypeScript/ESLint errors fail builds
+- **Prisma**: Client in `app/generated/prisma` (non-default)
+- **Theme**: `next-themes` with localStorage, dark mode default
+- **Server/Client boundary**: Client Components cannot import Server Components

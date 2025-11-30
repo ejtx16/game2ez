@@ -32,6 +32,8 @@ NBA player data visualization and management application with unique features bu
 
 4. Open [http://localhost:3000](http://localhost:3000)
 
+5. You can check the deployed wep app here: [https://game2ez.vercel.app/](https://game2ez.vercel.app/)
+
 <!-- ## Scripts
 
 - `npm run dev` - Start development server
@@ -92,6 +94,7 @@ Please visit thes two documents:
 Game2EZ is free software licensed under the [GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)](LICENSE).
 
 This means you have the freedom to:
+
 - Use the software for any purpose
 - Study how it works and modify it
 - Redistribute copies
