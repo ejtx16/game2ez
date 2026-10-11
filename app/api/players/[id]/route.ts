@@ -1,59 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { unstable_cache } from 'next/cache'
+import { BallDontLieError, bdlFetch } from '@/lib/api/balldontlie'
+import type { Player } from '@/types'
+
+const getCachedPlayer = (playerId: string) =>
+	unstable_cache(
+		async () => bdlFetch<{ data: Player }>(`/players/${playerId}`),
+		['player-details', playerId],
+		{
+			revalidate: 1800,
+			tags: ['player-details', `player-${playerId}`],
+		},
+	)()
 
 export async function GET(
 	request: NextRequest,
-	{ params }: { params: Promise<{ id: string }> }
+	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const { id: playerId } = await params
 
-	if (!playerId) {
+	if (!playerId || isNaN(Number(playerId))) {
 		return NextResponse.json(
-			{ error: 'Player ID is required' },
-			{ status: 400 }
+			{ error: 'A numeric player ID is required' },
+			{ status: 400 },
 		)
 	}
 
 	try {
-		const apiKey = process.env.BALLDONTLIE_API_KEY
-		const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1'
-
-		if (!apiKey) {
-			console.error('BALLDONTLIE_API_KEY is not set')
-			return NextResponse.json(
-				{ error: 'API configuration error' },
-				{ status: 500 }
-			)
-		}
-
-		const response = await fetch(
-			`${apiUrl}/players/${playerId}`,
-			{
-				headers: {
-					Authorization: apiKey,
-				},
-			}
-		)
-
-		if (!response.ok) {
-			console.error(
-				`Failed to fetch player ${playerId}:`,
-				response.status,
-				response.statusText
-			)
-			return NextResponse.json(
-				{ error: 'Failed to fetch player data' },
-				{ status: response.status }
-			)
-		}
-
-		const data = await response.json()
+		const data = await getCachedPlayer(playerId)
 
 		return NextResponse.json(data)
 	} catch (error) {
-		console.error('Error fetching player:', error)
+		console.error(`Error fetching player ${playerId}:`, error)
+
+		const status = error instanceof BallDontLieError ? error.status : 500
+
 		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
+			{
+				error:
+					status === 429
+						? 'API rate limit exceeded. Please wait a few moments and try again.'
+						: 'Failed to fetch player data',
+			},
+			{ status },
 		)
 	}
 }

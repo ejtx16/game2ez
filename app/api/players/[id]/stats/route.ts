@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
+import {
+	BallDontLieError,
+	PLAN_REQUIRED_MESSAGE,
+	bdlFetch,
+	hasPaidTier,
+} from '@/lib/api/balldontlie'
 
-async function fetchPlayerStatsFromAPI(playerId: string, searchParams: URLSearchParams) {
-	const apiKey = process.env.BALLDONTLIE_API_KEY
-	const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1'
-
-	if (!apiKey) {
-		throw new Error('BALLDONTLIE_API_KEY is not set')
-	}
-
+const buildStatsParams = (playerId: string, searchParams: URLSearchParams) => {
 	const params = new URLSearchParams()
 	params.set('player_ids[]', playerId)
 
@@ -27,65 +26,78 @@ async function fetchPlayerStatsFromAPI(playerId: string, searchParams: URLSearch
 		params.set('end_date', endDate)
 	}
 
-	const perPage = searchParams.get('per_page') || '25'
-	params.set('per_page', perPage)
+	params.set('per_page', searchParams.get('per_page') || '25')
 
 	const cursor = searchParams.get('cursor')
 	if (cursor) {
 		params.set('cursor', cursor)
 	}
 
-	const response = await fetch(
-		`${apiUrl}/stats?${params.toString()}`,
-		{
-			headers: {
-				Authorization: apiKey,
-			},
-		}
-	)
-
-	if (!response.ok) {
-		throw new Error(`Failed to fetch player stats: ${response.status} ${response.statusText}`)
-	}
-
-	return await response.json()
+	return params
 }
 
+/**
+ * GET /api/players/[id]/stats
+ *
+ * Game player stats need a paid BallDontLie plan. On the free plan this
+ * answers 403 PLAN_REQUIRED and spends no API request.
+ */
 export async function GET(
 	request: NextRequest,
-	{ params }: { params: Promise<{ id: string }> }
+	{ params }: { params: Promise<{ id: string }> },
 ) {
 	const { id: playerId } = await params
 
-	if (!playerId) {
+	if (!playerId || isNaN(Number(playerId))) {
 		return NextResponse.json(
-			{ error: 'Player ID is required' },
-			{ status: 400 }
+			{ error: 'A numeric player ID is required' },
+			{ status: 400 },
+		)
+	}
+
+	if (!hasPaidTier()) {
+		return NextResponse.json(
+			{ error: PLAN_REQUIRED_MESSAGE, code: 'PLAN_REQUIRED' },
+			{ status: 403 },
 		)
 	}
 
 	try {
-		const searchParams = request.nextUrl.searchParams
-		const seasons = searchParams.get('seasons') || new Date().getFullYear().toString()
-		const cacheKey = `player-stats-${playerId}-${seasons}`
+		const statsParams = buildStatsParams(
+			playerId,
+			request.nextUrl.searchParams,
+		)
 
 		const getCachedStats = unstable_cache(
-			async () => fetchPlayerStatsFromAPI(playerId, searchParams),
-			[cacheKey],
+			async () => bdlFetch<unknown>('/stats', statsParams),
+			['player-stats-api', statsParams.toString()],
 			{
 				revalidate: 1800,
 				tags: ['player-stats', `player-${playerId}`],
-			}
+			},
 		)
 
-		const data = await getCachedStats()
-
-		return NextResponse.json(data)
+		return NextResponse.json(await getCachedStats())
 	} catch (error) {
 		console.error('Error fetching player stats:', error)
+
+		const status = error instanceof BallDontLieError ? error.status : 500
+
+		if (status === 401) {
+			return NextResponse.json(
+				{ error: PLAN_REQUIRED_MESSAGE, code: 'PLAN_REQUIRED' },
+				{ status: 403 },
+			)
+		}
+
 		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
+			{
+				error:
+					status === 429
+						? 'API rate limit exceeded. Please wait a few moments and try again.'
+						: 'Failed to fetch player stats',
+			},
+			{ status },
 		)
 	}
 }

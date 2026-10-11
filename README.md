@@ -18,11 +18,16 @@ NBA player data visualization and management application with unique features bu
    npm install
    ```
 
-2. Set up environment variables (optional):
+2. Set up environment variables. Copy `.env.example` to `.env.local` and fill in:
 
    ```bash
-   DATABASE_URL="postgresql://..."
+   BALLDONTLIE_API_KEY=your_api_key_here  # required, see below
+   BALLDONTLIE_API_TIER=free              # free, all-star or goat
+   DATABASE_URL="postgresql://..."        # optional
    ```
+
+   Get a free BallDontLie key at [app.balldontlie.io/signup](https://app.balldontlie.io/signup).
+   Without it, no NBA data loads.
 
 3. Run development server:
 
@@ -72,6 +77,19 @@ prisma/
 - `players` - Player profiles and team associations
 - `games` - Game data with scores and team details
 - `stats` - Player statistics per game -->
+
+## BallDontLie API Plans
+
+| Feature | Free | All-Star | GOAT |
+| --- | --- | --- | --- |
+| Teams, games, player profiles | Yes | Yes | Yes |
+| Current team rosters | Approximate | Yes | Yes |
+| Player game stats and charts | No | Yes | Yes |
+| Requests per minute | 5 | 60 | 600 |
+
+On the free plan, team rosters come from the `/players` endpoint, which can
+include former players. Player stats show a plan notice. After you upgrade,
+set `BALLDONTLIE_API_TIER` to `all-star` or `goat` to turn them on.
 
 ## Coming Soon...
 

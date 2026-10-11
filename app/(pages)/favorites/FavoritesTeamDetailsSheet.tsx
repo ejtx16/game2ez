@@ -39,6 +39,7 @@ export default function FavoritesTeamDetailsSheet({
 	const [players, setPlayers] = useState<Player[]>([])
 	const [playersLoading, setPlayersLoading] = useState(false)
 	const [playersError, setPlayersError] = useState<string | null>(null)
+	const [playersSource, setPlayersSource] = useState<string | null>(null)
 	const [showGames, setShowGames] = useState(false)
 	const [games, setGames] = useState<Game[]>([])
 	const [gamesLoading, setGamesLoading] = useState(false)
@@ -90,6 +91,7 @@ export default function FavoritesTeamDetailsSheet({
 			setShowPlayers(false)
 			setPlayers([])
 			setPlayersError(null)
+			setPlayersSource(null)
 			setShowGames(false)
 			setGames([])
 			setGamesError(null)
@@ -124,6 +126,7 @@ export default function FavoritesTeamDetailsSheet({
 
 			const data = await response.json()
 			setPlayers(data.data || [])
+			setPlayersSource(data.meta?.source ?? null)
 		} catch (err) {
 			console.error('Error fetching players:', err)
 			setPlayersError('Failed to load players. Please try again.')
@@ -329,6 +332,15 @@ export default function FavoritesTeamDetailsSheet({
 										</p>
 									</div>
 								)}
+
+								{!playersLoading &&
+									!playersError &&
+									playersSource === 'all-players' && (
+										<p className="mb-4 rounded-xl border border-orange-200 dark:border-orange-500/30 bg-orange-50 dark:bg-orange-500/10 px-4 py-3 text-xs font-medium text-orange-800 dark:text-orange-300">
+											Free API plan: this list can include former players. A
+											paid BallDontLie plan shows the current roster only.
+										</p>
+									)}
 
 								{!playersLoading && !playersError && players.length > 0 && (
 									<div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
