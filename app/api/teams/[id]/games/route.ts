@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import type { Game } from '@/types'
+import { bdlFetch } from '@/lib/api/balldontlie'
 
 const getCachedTeamGames = (
   teamId: number,
@@ -10,12 +11,6 @@ const getCachedTeamGames = (
 ) =>
   unstable_cache(
     async () => {
-      const apiKey = process.env.BALLDONTLIE_API_KEY
-
-      if (!apiKey) {
-        throw new Error('BallDontLie API key is not configured')
-      }
-
       const params = new URLSearchParams()
       params.append('team_ids[]', teamId.toString())
 
@@ -30,21 +25,7 @@ const getCachedTeamGames = (
       const perPage = limit && limit <= 100 ? limit : 25
       params.append('per_page', perPage.toString())
 
-      const url = `https://api.balldontlie.io/v1/games?${params.toString()}`
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: apiKey,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(
-          `BallDontLie API error: ${response.status} ${response.statusText}`
-        )
-      }
-
-      const data = await response.json()
+      const data = await bdlFetch<{ data: any[] }>('/games', params)
 
       const games: Game[] = data.data.map((game: any) => ({
         id: game.id,

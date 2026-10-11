@@ -12,110 +12,109 @@ import {
 	Hash,
 	Target,
 	BarChart3,
+	Lock,
 } from 'lucide-react'
 import Link from 'next/link'
-import type { Player } from '@/types'
+import type { Player, Stats } from '@/types'
+import {
+	BallDontLieError,
+	PLAN_REQUIRED_MESSAGE,
+	bdlFetch,
+	hasPaidTier,
+} from '@/lib/api/balldontlie'
 import PlayerStatsChart from '@/components/PlayerStatsChart'
 import PlayerStatsLineChart from '@/components/PlayerStatsLineChart'
 import PlayerStatsPolarChart from '@/components/PlayerStatsPolarChart'
 import PlayerStatsSummary from '@/components/PlayerStatsSummary'
 import RecentGames from '@/components/RecentGames'
 
-const getPlayerData = (playerId: string) =>
+const getCachedPlayer = (playerId: string) =>
 	unstable_cache(
 		async () => {
-			const apiKey = process.env.BALLDONTLIE_API_KEY
-			const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1'
+			const response = await bdlFetch<{ data: Player }>(
+				`/players/${playerId}`,
+			)
 
-			if (!apiKey) {
-				console.error('BALLDONTLIE_API_KEY is not set')
-				return null
-			}
-
-			try {
-				const response = await fetch(
-					`${apiUrl}/players/${playerId}`,
-					{
-						headers: {
-							Authorization: apiKey,
-						},
-					}
-				)
-
-				if (!response.ok) {
-					console.error(
-						`Failed to fetch player ${playerId}:`,
-						response.status,
-						response.statusText
-					)
-					return null
-				}
-
-				const responseData = await response.json()
-				const player: Player = responseData.data
-
-				return player
-			} catch (error) {
-				console.error('Error fetching player:', error)
-				return null
-			}
+			return response.data
 		},
 		['player-details', playerId],
 		{
 			revalidate: 1800,
 			tags: ['player-details', `player-${playerId}`],
-		}
+		},
 	)()
 
-const getPlayerStats = (playerId: string) =>
+const getCachedPlayerStats = (playerId: string, season: string) =>
 	unstable_cache(
 		async () => {
-			const apiKey = process.env.BALLDONTLIE_API_KEY
-			const apiUrl = process.env.BALLDONTLIE_API_URL || 'https://api.balldontlie.io/v1'
+			const params = new URLSearchParams()
+			params.set('player_ids[]', playerId)
+			params.set('seasons[]', season)
+			params.set('per_page', '25')
 
-			if (!apiKey) {
-				console.error('BALLDONTLIE_API_KEY is not set')
-				return []
-			}
+			const response = await bdlFetch<{ data?: Stats[] }>('/stats', params)
 
-			try {
-				const currentSeason = new Date().getFullYear()
-				const params = new URLSearchParams()
-				params.set('player_ids[]', playerId)
-				params.set('seasons[]', currentSeason.toString())
-				params.set('per_page', '25')
-
-				const response = await fetch(
-					`${apiUrl}/stats?${params.toString()}`,
-					{
-						headers: {
-							Authorization: apiKey,
-						},
-					}
-				)
-
-				if (!response.ok) {
-					console.error(
-						`Failed to fetch player stats for ${playerId}:`,
-						response.status,
-						response.statusText
-					)
-					return []
-				}
-
-				const data = await response.json()
-				return data.data || []
-			} catch (error) {
-				console.error('Error fetching player stats:', error)
-				return []
-			}
+			return response.data ?? []
 		},
-		['player-stats', playerId, new Date().getFullYear().toString()],
+		['player-stats', playerId, season],
 		{
 			revalidate: 1800,
 			tags: ['player-stats', `player-${playerId}`],
-		}
+		},
 	)()
+
+// Failures are caught outside unstable_cache, so they are never cached.
+const getPlayerData = async (playerId: string): Promise<Player | null> => {
+	try {
+		return await getCachedPlayer(playerId)
+	} catch (error) {
+		console.error(`Error fetching player ${playerId}:`, error)
+		return null
+	}
+}
+
+interface PlayerStatsResult {
+	stats: Stats[]
+	planRequired: boolean
+}
+
+// Game player stats need a paid plan. On the free plan, skip the request.
+const getPlayerStats = async (playerId: string): Promise<PlayerStatsResult> => {
+	if (!hasPaidTier()) {
+		return { stats: [], planRequired: true }
+	}
+
+	try {
+		const season = new Date().getFullYear().toString()
+
+		return {
+			stats: await getCachedPlayerStats(playerId, season),
+			planRequired: false,
+		}
+	} catch (error) {
+		console.error(`Error fetching player stats for ${playerId}:`, error)
+
+		return {
+			stats: [],
+			planRequired: error instanceof BallDontLieError && error.status === 401,
+		}
+	}
+}
+
+const StatsPlanNotice = () => (
+	<div className="bg-gray-50/50 dark:bg-zinc-900/50 border border-dashed border-gray-300 dark:border-zinc-700 rounded-xl p-8 flex flex-col items-center text-center gap-3">
+		<div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
+			<Lock className="w-6 h-6 text-orange-500" />
+		</div>
+		<h3 className="text-lg font-bold text-gray-900 dark:text-white">
+			Stats not available on the free plan
+		</h3>
+		<p className="max-w-md text-sm text-gray-500 dark:text-zinc-400">
+			{PLAN_REQUIRED_MESSAGE} Player profiles, teams and games still work on
+			the free plan.
+		</p>
+	</div>
+)
 
 export default async function PlayerPage({
 	params,
@@ -123,7 +122,7 @@ export default async function PlayerPage({
 	params: Promise<{ id: string }>
 }) {
 	const { id } = await params
-	const [player, stats] = await Promise.all([
+	const [player, { stats, planRequired }] = await Promise.all([
 		getPlayerData(id),
 		getPlayerStats(id),
 	])
@@ -349,9 +348,11 @@ export default async function PlayerPage({
 					)}
 
 					{/* Recent Games Card */}
-					<div className="md:col-span-2 lg:col-span-3 xl:col-span-1">
-						<RecentGames stats={stats} limit={3} />
-					</div>
+					{!planRequired && (
+						<div className="md:col-span-2 lg:col-span-3 xl:col-span-1">
+							<RecentGames stats={stats} limit={3} />
+						</div>
+					)}
 				</div>
 
 				{/* Player Statistics Section */}
@@ -372,11 +373,15 @@ export default async function PlayerPage({
 					<div className="h-1 w-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mb-6"></div>
 
 					{/* Charts Grid */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-						<PlayerStatsChart stats={stats} />
-						<PlayerStatsLineChart stats={stats} />
-						<PlayerStatsPolarChart stats={stats} />
-					</div>
+					{planRequired ? (
+						<StatsPlanNotice />
+					) : (
+						<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+							<PlayerStatsChart stats={stats} />
+							<PlayerStatsLineChart stats={stats} />
+							<PlayerStatsPolarChart stats={stats} />
+						</div>
+					)}
 				</div>
 
 				{/* Footer Section */}
