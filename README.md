@@ -27,7 +27,8 @@ NBA player data visualization and management application with unique features bu
    ```
 
    Get a free BallDontLie key at [app.balldontlie.io/signup](https://app.balldontlie.io/signup).
-   Without it, no NBA data loads.
+   Without it, no NBA data loads. See the full
+   [BallDontLie API setup guide](./balldontlie-setup.md).
 
 3. Run development server:
 
